@@ -9,7 +9,7 @@ from constants import leagueID, leagueStartYear, leagueEndYear, standings_direct
 # Iterate through each season
 # Parse standings, owners, and draft results
 # Write to a csv file
-for i in range(2020, 2024):
+for i in (2024):    #### Change based on which seasons you want to scrape ####
     season = str(i)
     setup_output_folders(leagueID, season)
 

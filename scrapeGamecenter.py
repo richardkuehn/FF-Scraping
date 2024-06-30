@@ -101,7 +101,7 @@ def getrow(teamId, week, longest_bench) :
 # Iterate through each week
 # Iterate through each team
 # Write team's gamecenter data to a csv file
-for s in range(leagueStartYear, leagueEndYear):
+for s in 2024:		#### Change based on which seasons you want to scrape ####
 	season = str(s)
 	# setup
 	setup_output_folders(leagueID, season)

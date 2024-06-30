@@ -9,9 +9,9 @@ largest_margin = 0
 narrowest_margin = 1000
 
 # Iterate through each year
-for year in os.listdir(gamecenter_directory):
+for year in (2020, 2021, 2022, 2023):
     print(year)
-    path = gamecenter_directory + year + '/'
+    path = gamecenter_directory + str(year) + '/'
     num_owners = get_number_of_owners(leagueID, path)
     
     # Iterate through each week
@@ -29,10 +29,10 @@ for year in os.listdir(gamecenter_directory):
                     # Calculate the margin of victory
                     margin = float(row['Total']) - float(row['Opponent Total'])
                     if margin > largest_margin:
-                        print("Week " + filename[:-4] + " " + row['Owner'] + " has a new blowout with a " + str(margin) + " point win over " + row['Opponent'])
+                        print("Week " + filename[:-4] + " " + row['Owner'] + " has a new blowout with a " + str(round(margin,2)) + " point win over " + row['Opponent'])
                         largest_margin = margin
                     if margin > 0 and margin < narrowest_margin:
-                        print("Week " + filename[:-4] + " " + row['Owner'] + " has a new narrow victory with a " + str(margin) + " point win over " + row['Opponent'])
+                        print("Week " + filename[:-4] + " " + row['Owner'] + " has a new narrow victory with a " + str(round(margin,2)) + " point win over " + row['Opponent'])
                         narrowest_margin = margin
 
 

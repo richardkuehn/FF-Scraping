@@ -1,9 +1,8 @@
 import csv
 import os
-
 from utils import get_number_of_owners
 from constants import leagueID, standings_directory
-
+import pandas as pd
 # Aggregates scraped standings data into a single CSV file
 # Assumptions:
 # Top half of the league makes the playoffs
@@ -12,7 +11,7 @@ from constants import leagueID, standings_directory
 aggregated_data = {}
 
 # Iterate through each file in the directory
-for filename in os.listdir(standings_directory):
+for filename in ('2020.csv','2021.csv','2022.csv','2023.csv'):      # os.listdir(standings_directory):
     if filename.endswith(".csv"):
         filepath = os.path.join(standings_directory, filename)
         with open(filepath, 'r', newline='') as file:
@@ -24,7 +23,7 @@ for filename in os.listdir(standings_directory):
 
                 # Initialize the manager's data if it doesn't exist
                 if manager_name not in aggregated_data:
-                    cols = ["PointsFor","PointsAgainst","Moves","Trades","Wins","Losses","Ties","Championships","Playoffs","Sackos","DraftPosition"]
+                    cols = ["PointsFor","PointsAgainst","Moves","Trades","Wins","Losses","Ties","Championships","Playoffs","ToiletBowls","DraftPosition"]
                     aggregated_data[manager_name] = {col: 0 for col in cols}
                     aggregated_data[manager_name]["Seasons"] = 1
                 else:
@@ -43,22 +42,43 @@ for filename in os.listdir(standings_directory):
                             aggregated_data[manager_name]["Playoffs"] += 1
                             aggregated_data[manager_name]["Championships"] += 1
                         elif int(value) == num_owners:
-                            aggregated_data[manager_name]["Sackos"] += 1
-                        elif int(value) <= int(num_owners/2):
+                            aggregated_data[manager_name]["ToiletBowls"] += 1
+                        elif int(value) <= 4:
                             aggregated_data[manager_name]["Playoffs"] += 1
-
+                        elif int(value) in (5, 6) and filename == '2023.csv':
+                            aggregated_data[manager_name]["Playoffs"] += 1
+## THINK ABOUT HOW TO CHANGE THIS SECTION TO ACCOUNT FOR 6 TEAM PLAYOFFS
 
 # Convert dict_keys to a list
 column_names = list(aggregated_data.values())[0].keys()
 
-# Write the aggregated data to a new CSV file
-output_filepath = './output/aggregated_standings_data.csv'
-with open(output_filepath, 'w', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=["ManagerName"] + list(column_names))
-    # Write the aggregated data to the CSV file
-    writer.writeheader()
-    for manager_name, data in aggregated_data.items():
-        data["ManagerName"] = manager_name
-        writer.writerow(data)
+# Round PointFor, PointAgainst to 2 decimals
+# Average Draft Position
+aggregated_data_df = pd.DataFrame(aggregated_data).T
+aggregated_data_df[['PointsFor', 'PointsAgainst']] = aggregated_data_df[['PointsFor', 'PointsAgainst']].round(2)
 
-print(f"Aggregated data written to {output_filepath}")
+columns_to_round = ['Moves', 'Trades', 'Wins', 'Losses', 'Ties', 'Championships', 'Playoffs', 'ToiletBowls', 'DraftPosition', 'Seasons']
+aggregated_data_df[columns_to_round] = aggregated_data_df[columns_to_round].round(0).astype(int)
+
+aggregated_data_df['AvgDraftPosition'] = (aggregated_data_df['DraftPosition'] / aggregated_data_df['Seasons']).round(1)
+
+aggregated_data_df
+
+# Export dataframe
+aggregated_data_df.to_csv('./output/aggregate/exc_2018_agg_data.csv', index=True)
+
+
+
+# Write the aggregated data to a new CSV file
+# output_filepath = './output/aggregated_standings_exc_2018.csv'
+# with open(output_filepath, 'w', newline='') as file:
+#     writer = csv.DictWriter(file, fieldnames=["ManagerName"] + list(column_names))
+#     # Write the aggregated data to the CSV file
+#     writer.writeheader()
+#     for manager_name, data in aggregated_data.items():
+#         data["ManagerName"] = manager_name
+#         writer.writerow(data)
+
+# print(f"Aggregated data written to {output_filepath}")
+
+# print(filename)
